@@ -215,6 +215,7 @@ dom.setTitle({
 
 window.addEventListener("focus", function(e) {
 	hasFocus = true;
+	unreadMessages = 0;
 	dom.setTitle({
 		room: muc
 	});
