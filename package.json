@@ -6,6 +6,9 @@
 	"author": "lumirayz <lumirayz@gmail.com>",
 	"description": "an xmpp and webrtc-based voice chat client",
 	"license": "GPLv3",
+	"devDependencies": {
+		"es6ify": "0.4.3"
+	},
 	"dependencies": {
 		"node-xmpp": "0.7.2"
 	}
