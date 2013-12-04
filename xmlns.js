@@ -33,3 +33,4 @@ exports.muc_user   = exports.muc + "#user";
 exports.chatstates = "http://jabber.org/protocol/chatstates";
 exports.muji       = "http://telepathy.freedesktop.org/muji";
 exports.jingle     = "urn:xmpp:jingle:1";
+exports.jingle_rtp = "urn:xmpp:jingle:apps:rtp:1";

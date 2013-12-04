@@ -52,6 +52,25 @@ var StanzaBuilder = {
 	mucSubject: function(room, subject) {
 		return new xmpp.Element("message", {to: room, type: "groupchat", xmlns: xmlns.client})
 			.c("subject").t(subject).up();
+	},
+	mujiPreparing: function(room) {
+		return new xmpp.Element("presence", {to: room, xmlns: xmlns.client})
+			.c("muji", {xmlns: xmlns.muji})
+				.c("preparing").up()
+			.up();
+	},
+	mujiContent: function(room, contents) {
+		var
+			stz  = new xmpp.Element("presence", {to: room, xmlns: xmlns.client}),
+			muji = stz.c("muji", {xmlns: xmlns.muji});
+		contents.forEach(function(content) {
+			var desc = muji.c("content", {name: content.name})
+				.c("description", {xmlns: xmlns.jingle_rtp, media: content.media});
+			content.payloads.forEach(function(payload) {
+				desc.c("payload-type", {id: payload.id, name: payload.name, clockrate: payload.clockrate});
+			});
+		});
+		return stz;
 	}
 };
 
