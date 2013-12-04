@@ -27,10 +27,11 @@
 //  2013 lumirayz <lumirayz@gmail.com>
 //
 
-exports.client     = "jabber:client";
-exports.muc        = "http://jabber.org/protocol/muc";
-exports.muc_user   = exports.muc + "#user";
-exports.chatstates = "http://jabber.org/protocol/chatstates";
-exports.muji       = "http://telepathy.freedesktop.org/muji";
-exports.jingle     = "urn:xmpp:jingle:1";
-exports.jingle_rtp = "urn:xmpp:jingle:apps:rtp:1";
+exports.client         = "jabber:client";
+exports.muc            = "http://jabber.org/protocol/muc";
+exports.muc_user       = exports.muc + "#user";
+exports.chatstates     = "http://jabber.org/protocol/chatstates";
+exports.muji           = "http://telepathy.freedesktop.org/muji";
+exports.jingle         = "urn:xmpp:jingle:1";
+exports.jingle_rtp     = "urn:xmpp:jingle:apps:rtp:1";
+exports.jingle_ice_udp = "urn:xmpp:jingle:transports:ice-udp:1";

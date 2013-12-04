@@ -56,3 +56,11 @@ exports.longestPrefix = function(strs) {
 		return strs[0].substr(0, longest);
 	}
 };
+
+exports.propfilter = function(src, props) {
+	var obj = {};
+	props.forEach(function(prop) {
+		obj[prop] = src[prop];
+	});
+	return obj;
+};

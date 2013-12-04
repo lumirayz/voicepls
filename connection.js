@@ -30,7 +30,8 @@
 var
 	events = require("events"),
 	xmlns  = require("./xmlns"),
-	xmpp   = require("node-xmpp");
+	xmpp   = require("node-xmpp"),
+	util   = require("./util");
 
 var StanzaBuilder = {
 	mucJoin: function(room, nick) {
@@ -53,6 +54,36 @@ var StanzaBuilder = {
 		return new xmpp.Element("message", {to: room, type: "groupchat", xmlns: xmlns.client})
 			.c("subject").t(subject).up();
 	},
+	jingleContent: function(name, creator, descriptions, transports) {
+		var stz = new xmpp.Element("content", {name: name, creator: creator});
+		descriptions.forEach(function(description) {
+			stz.children.push(jingleDescriptionRTP(description.media, description,payloads));
+		});
+		transports.forEach(function(transport) {
+			stz.children.push(jingleTransportICE(transport.pwd, transport.ufrag, transport.candidates));
+		});
+		return stz;
+	},
+	jingleDescriptionRTP: function(media, payloads) {
+		var stz = new xmpp.Element("description", {xmlns: xmls.jingle_rtp});
+		payloads.forEach(function(payload) {
+			stz.c("payload-type", util.propfilter(payload,
+				["clockrate", "channels", "id", "maxptime", "name", "ptime"]));
+		});
+		return stz;
+	},
+	jingleTransportICE: function(pwd, ufrag, candidates) {
+		var stz = new xmpp.Element("transport", {xmlns: xmlns.jingle_ice_udp, pwd: pwd, ufrag: ufrag});
+		candidates.forEach(function(candidate) {
+			stz.c("candidate", util.propfilter(candidate, [
+				"component", "foundation",
+				"generation", "id", "ip",
+				"network", "port", "priority",
+				"protocol", "type", "rel-addr",
+				"rel-port"]));
+		});
+		return stz;
+	},
 	mujiPreparing: function(room) {
 		return new xmpp.Element("presence", {to: room, xmlns: xmlns.client})
 			.c("muji", {xmlns: xmlns.muji})
@@ -64,13 +95,16 @@ var StanzaBuilder = {
 			stz  = new xmpp.Element("presence", {to: room, xmlns: xmlns.client}),
 			muji = stz.c("muji", {xmlns: xmlns.muji});
 		contents.forEach(function(content) {
-			var desc = muji.c("content", {name: content.name})
+			var desc = muji.c("content", {name: content.name, creator: content.creator})
 				.c("description", {xmlns: xmlns.jingle_rtp, media: content.media});
 			content.payloads.forEach(function(payload) {
 				desc.c("payload-type", {id: payload.id, name: payload.name, clockrate: payload.clockrate});
 			});
 		});
 		return stz;
+	},
+	jingle: function(jid, initiator, action, sid, contents) {
+		
 	}
 };
 
