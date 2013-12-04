@@ -219,10 +219,18 @@ window.addEventListener("focus", function(e) {
 	dom.setTitle({
 		room: muc
 	});
+	if(chatstate !== "active") {
+		conn.chatstate(muc, "active");
+		chatstate = "active";
+	}
 });
 
 window.addEventListener("blur", function(e) {
 	hasFocus = false;
+	if(chatstate !== "inactive") {
+		conn.chatstate(muc, "inactive");
+		chatstate = "inactive";
+	}
 });
 
 //
