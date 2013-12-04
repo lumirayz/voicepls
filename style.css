@@ -1,0 +1,96 @@
+#main {
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	width: 100%;
+	height: 100%;
+}
+
+#topbar {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 23px;
+	border-bottom: 1px solid #111;
+	line-height: 23px;
+	text-align: center;
+}
+
+#splitter {
+	position: absolute;
+	left: 0;
+	top: 24px;
+	width: 100%;
+	height: calc(100% - 24px);
+}
+
+#splitter_left {
+	position: relative;
+	float: left;
+	width: calc(100% - 200px);
+	height: 100%;
+}
+
+#userlist {
+	position: relative;
+	float: left;
+	width: 199px;
+	height: 100%;
+	border-left: 1px solid #111;
+}
+
+#chatrecv {
+	position: relative;
+	width: 100%;
+	height: calc(100% - 20px);
+	background-color: #FFF;
+	overflow: auto;
+	overflow-x: hidden;
+}
+
+#chatsend {
+	position: relative;
+	width: 100%;
+	height: 19px;
+	border-top: 1px solid #111;
+}
+
+#chatsend_tb {
+	border: none;
+	width: 100%;
+	height: 17px;
+}
+
+.msg_cont {
+	border-bottom: 1px solid #111;
+	overflow: hidden;
+}
+
+.msg_system_nick, .msg_emote_nick, .msg_text_nick {
+	float: left;
+	padding: 1px;
+	margin-right: 2px;
+	border-right: 1px solid #111;
+}
+
+.msg_emote_nick {
+	border-right: none;
+	color: #F0F;
+}
+
+.msg_system_body, .msg_emote_body, .msg_text_body {
+	float: left;
+}
+
+.msg_emote_body {
+	color: #F0F;
+}
+
+.ul_node_cont {
+	border-bottom: 1px solid #111;
+}
+
+.ul_node_nick {
+	margin-left: 4px;
+}

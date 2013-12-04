@@ -1,0 +1,12 @@
+{
+	"name": "voicepls",
+	"preferGlobal": false,
+	"browserify": "./main",
+	"version": "0.0.1",
+	"author": "lumirayz <lumirayz@gmail.com>",
+	"description": "an xmpp and webrtc-based voice chat client",
+	"license": "GPLv3",
+	"dependencies": {
+		"node-xmpp": "0.7.2"
+	}
+}
