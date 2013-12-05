@@ -28,6 +28,11 @@
 //
 
 //
+// Requires
+//
+var media = require("./media");
+
+//
 // Query
 //
 function q(query) {
@@ -57,15 +62,19 @@ function setTitle(info) {
 //
 function createMessage() {
 	var
-		cont = document.createElement("div"),
-		nick = document.createElement("div"),
-		body = document.createElement("div");
+		cont  = document.createElement("div"),
+		nick  = document.createElement("div"),
+		body  = document.createElement("div"),
+		media = document.createElement("div");
 	cont.className = "msg_cont";
+	media.className = "msg_media";
 	cont.appendChild(nick);
 	cont.appendChild(body);
+	cont.appendChild(media);
 	cont.appInfo = {
 		nick: nick,
-		body: body
+		body: body,
+		media: media
 	};
 	return cont;
 }
@@ -90,6 +99,23 @@ function updateMessage(elm, msg) {
 		a.nick.className = "msg_system_nick";
 		a.body.className = "msg_system_body";
 	}
+	a.media.style.display = "none";
+	/* // TODO: security
+	medias = media.detectMessageMedia(msg.body);
+	if(medias.length > 0) {
+		a.media.style.display = "block";
+		medias.forEach(x => {
+			var div = document.createElement("div");
+			div.className = "msg_media_div";
+			div.appendChild(x);
+			a.media.appendChild(div);
+		});
+	}
+	else {
+		a.media.style.display = "none";
+		a.media.innerHTML = "";
+	}
+	*/
 }
 
 function appendMessage(elm) {

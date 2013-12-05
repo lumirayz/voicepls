@@ -67,6 +67,24 @@
 	overflow: hidden;
 }
 
+.msg_media {
+	clear: both;
+	border-top: 1px solid #111;
+	height: 100px;
+	overflow: hidden;
+}
+
+.msg_media_div {
+	display: block;
+	float: left;
+	width: 90px;
+	height: 90px;
+	margin: 5px;
+	border: 1px solid #111;
+	border-radius: 4px;
+	overflow: hidden;
+}
+
 .msg_system_nick, .msg_emote_nick, .msg_text_nick {
 	float: left;
 	padding: 1px;
