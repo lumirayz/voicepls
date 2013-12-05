@@ -58,6 +58,32 @@ function setTitle(info) {
 }
 
 //
+// Body
+//
+var tokenToDOM = {
+	text: token => document.createTextNode(token.text),
+	link: token => {
+		var a = document.createElement("a");
+		a.href = token.link;
+		a.target = "_blank";
+		a.textContent = token.link;
+		return a;
+	}
+};
+
+function setBody(elm, body) {
+	elm.innerHTML = "";
+	var tokens = media.tokenize(body);
+	tokens.forEach(x => {
+		var dom = tokenToDOM[x.type](x);
+		if(dom !== null) {
+			elm.appendChild(dom);
+		}
+	});
+	return elm;
+}
+
+//
 // Messages
 //
 function createMessage() {
@@ -83,19 +109,19 @@ function updateMessage(elm, msg) {
 	var a = elm.appInfo;
 	if(msg.type == "message") {
 		a.nick.textContent = msg.nick;
-		a.body.textContent = msg.body;
+		setBody(a.body, msg.body);
 		a.nick.className = "msg_text_nick";
 		a.body.className = "msg_text_body";
 	}
 	else if(msg.type == "emote") {
 		a.nick.textContent = msg.nick;
-		a.body.textContent = msg.body;
+		setBody(a.body, msg.body);
 		a.nick.className = "msg_emote_nick";
 		a.body.className = "msg_emote_body";
 	}
 	else if(msg.type == "system") {
 		a.nick.textContent = "system";
-		a.body.textContent = msg.body;
+		setBody(a.body, msg.body);
 		a.nick.className = "msg_system_nick";
 		a.body.className = "msg_system_body";
 	}
