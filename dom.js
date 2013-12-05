@@ -107,19 +107,19 @@ function createMessage() {
 
 function updateMessage(elm, msg) {
 	var a = elm.appInfo;
-	if(msg.type == "message") {
+	if(msg.type === "message") {
 		a.nick.textContent = msg.nick;
 		setBody(a.body, msg.body);
 		a.nick.className = "msg_text_nick";
 		a.body.className = "msg_text_body";
 	}
-	else if(msg.type == "emote") {
+	else if(msg.type === "emote") {
 		a.nick.textContent = msg.nick;
 		setBody(a.body, msg.body);
 		a.nick.className = "msg_emote_nick";
 		a.body.className = "msg_emote_body";
 	}
-	else if(msg.type == "system") {
+	else if(msg.type === "system") {
 		a.nick.textContent = "system";
 		setBody(a.body, msg.body);
 		a.nick.className = "msg_system_nick";
@@ -176,7 +176,7 @@ function updateUserlistNode(elm, nick, info) {
 	var a = elm.appInfo;
 	a.nick.textContent = nick;
 	a.nick.style.color = chatstateColors[info.chatstate];
-	if(info.role == "moderator") {
+	if(info.role === "moderator") {
 		a.nick.style.fontWeight = "bold";
 	}
 	else {

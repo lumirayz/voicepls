@@ -103,7 +103,7 @@ function parseToken(word) {
 }
 
 function addToken(tokens, t) {
-	if(tokens.length == 0) {
+	if(tokens.length === 0) {
 		return [t];
 	}
 	else {
@@ -111,10 +111,10 @@ function addToken(tokens, t) {
 		if(last.type === "text" && t.type === "text") {
 			return tokens.concat([{type: "text", text: last.text + " " + t.text}]);
 		}
-		else if(last.type == "text") {
+		else if(last.type === "text") {
 			return tokens.concat([{type: "text", text: last.text + " "}, t]);
 		}
-		else if(t.type == "text") {
+		else if(t.type === "text") {
 			return tokens.concat([last, {type: "text", text: " " + t.text}]);
 		}
 		else {
