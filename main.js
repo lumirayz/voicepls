@@ -32,18 +32,61 @@
 //
 var
 	config     = require("./config").config,
-	Connection = require("./connection").Connection,
+	StanzaIO   = require("stanza.io"),
+	stanza     = require("jxt"),
 	dom        = require("./dom"),
 	Messages   = require("./messages").Messages,
 	Userlist   = require("./userlist").Userlist,
 	util       = require("./util");
 
 //
+// Add a few stanzas
+//
+
+// TODO: Maybe a good idea to upstream this?
+stanza.add(StanzaIO.Message, "subject", stanza.subText("jabber:client", "subject"));
+
+var MUC_NS = "http://jabber.org/protocol/muc";
+var MUC_USER_NS = MUC_NS + "#user";
+
+var MUCPresence = stanza.define({
+	name: "mucPresence",
+	element: "x",
+	namespace: MUC_USER_NS,
+	fields: {
+		affiliation: stanza.subAttribute(MUC_USER_NS, "item", "affiliation"),
+		nick: stanza.subAttribute(MUC_USER_NS, "item", "nick"),
+		jid: stanza.subAttribute(MUC_USER_NS, "item", "jid"),
+		role: stanza.subAttribute(MUC_USER_NS, "item", "role"),
+		codes: {
+			get: function() {
+				return stanza.find(this.xml, MUC_USER_NS, "status")
+					.map(function(x) {return x.getAttribute("code");});
+			},
+			set: function(val) {
+				var codes = stanza.find(this.xml, MUC_USER_NS, "status");
+				for(var i = 0; i < codes.length; i++) {
+					this.xml.removeChild(codes[i]);
+				}
+				for(var i = 0; i < val.length; i++) {
+					var elm = document.createElementNS(MUC_USER_NS, "status");
+					elm.setAttribute(val[i]);
+					this.xml.appendChild(elm);
+				}
+			}
+		}
+	}
+});
+
+stanza.extend(StanzaIO.Presence, MUCPresence);
+
+//
 // Init
 //
-var conn = new Connection({
-	boshURL: config.bosh_service,
-	jid: config.jid});
+var conn = StanzaIO.createClient({
+	wsURL: config.wsURL,
+	jid: config.jid,
+	server: config.server});
 
 var msgs = new Messages();
 var users = new Userlist();
@@ -52,88 +95,100 @@ var muc = window.location.href.split("?").slice(1).join("?") + "@" + config.muc_
 
 var hasFocus = true, unreadMessages = 0;
 
+conn.connect();
+
 //
 // Online
 //
-conn.on("online", function() {
-	conn.join(muc, "omnomnom" + Math.floor(Math.random() * 1000000));
+conn.on("session:started", function() {
+	conn.joinRoom(muc, "omnomnom" + Math.floor(Math.random() * 1000000));
 });
 
 //
 // Message
 //
-conn.on("message", function(msg) {
-	if(msg.body.substr(0, 4) === "/me ") {
-		msg.type = "emote";
-		msg.body = msg.body.substr(4);
-	}
-	msgs.add(msg, msg.id);
-	if(!hasFocus) {
-		unreadMessages++;
-		dom.setTitle({
-			messages: unreadMessages,
-			room: muc
-		});
+conn.on("groupchat", function(msg) {
+	if(msg.body) {
+		var msg = {
+			type: "message",
+			body: msg.body,
+			nick: msg.from.resource,
+			id: msg.id
+		};
+		if(msg.body.substr(0, 4) === "/me ") {
+			msg.type = "emote";
+			msg.body = msg.body.substr(4);
+		}
+		msgs.add(msg, msg.id);
+		if(!hasFocus) {
+			unreadMessages++;
+			dom.setTitle({
+				messages: unreadMessages,
+				room: muc
+			});
+		}
 	}
 });
 
 //
 // Join/leave
 //
-conn.on("join", function(e) {
-	var elm = dom.createMessage();
-	dom.updateMessage(elm, {
-		type: "system",
-		body: e.nick + " has joined the room."
-	});
-	dom.appendMessage(elm);
-	users.add(e.nick, {
-		chatstate: "active",
-		affiliation: e.affiliation,
-		role: e.role
-	});
-});
+var participants = {};
 
-conn.on("leave", function(e) {
-	var elm = dom.createMessage();
-	dom.updateMessage(elm, {
-		type: "system",
-		body: e.nick + " has left the room."
-	});
-	dom.appendMessage(elm);
-	users.remove(e.nick);
-});
-
-conn.on("nick", function(e) {
-	var elm = dom.createMessage();
-	dom.updateMessage(elm, {
-		type: "system",
-		body: e.oldnick + " has changed their nick to " + e.newnick
-	});
-	dom.appendMessage(elm);
-	users.nick(e.oldnick, e.newnick);
+conn.on("presence", function(pres) {
+	if(pres.from.bare === muc) {
+		var mp = pres.mucPresence, nick = pres.from.resource;
+		if(pres.type === "unavailable") {
+			if(mp.codes.indexOf("303") !== -1) { // Name change.
+				system(nick + " has changed their name to " + mp.nick + ".");
+				delete participants[nick];
+				participants[mp.nick] = true;
+				users.nick(nick, mp.nick);
+			}
+			else { // Leave room.
+				system(nick + " has left the room.");
+				delete participants[nick];
+				users.remove(nick);
+			}
+		}
+		else { // Join.
+			if(participants.hasOwnProperty(nick)) {
+				// Probably a nick change.
+			}
+			else {
+				system(nick + " has joined the room.");
+				users.add(nick, {
+					chatstate: "active",
+					affiliation: mp.affiliation,
+					role: mp.role
+				});
+			}
+		}
+	}
 });
 
 //
 // Chatstate
 //
-conn.on("chatstate", function(e) {
-	users.edit(e.nick, function(info) {
-		info.chatstate = e.chatstate;
+conn.on("chatState", function(e) {
+	users.edit(e.from.resource, function(info) {
+		info.chatstate = e.chatState;
 	});
 });
 
 //
 // Subject
 //
-conn.on("subject", function(e) {
-	var elm = dom.createMessage();
-	dom.updateMessage(elm, {
-		type: "system",
-		body: e.nick + " has changed the subject to \"" + e.subject + "\"."
-	});
-	dom.appendMessage(elm);
-	dom.topbar.textContent = e.subject;
+conn.on("message", function(msg) {
+	if(msg.from.bare === muc && msg.subject) {
+		var elm = dom.createMessage();
+		dom.updateMessage(elm, {
+			type: "system",
+			body: msg.from.resource + " has changed the subject to \"" + msg.subject + "\"."
+		});
+		dom.appendMessage(elm);
+		dom.topbar.textContent = msg.subject;
+	}
 });
 
 //
@@ -194,15 +249,15 @@ users.on("remove", function(nick) {
 //
 var slashCommands = {
 	"/nick": function(args) {
-		conn.nick(muc, args.join(" "));
+		setNick(args.join(" "));
 	},
 	
 	"/me": function(args) {
-		conn.mucmsg(muc, "/me " + args.join(" "));
+		sendMessage("/me " + args.join(" "));
 	},
 	
 	"/topic": function(args) {
-		conn.subject(muc, args.join(" "));
+		setSubject(args.join(" "));
 	}
 };
 
@@ -219,18 +274,12 @@ window.addEventListener("focus", function(e) {
 	dom.setTitle({
 		room: muc
 	});
-	if(chatstate !== "active") {
-		conn.chatstate(muc, "active");
-		chatstate = "active";
-	}
+	setChatstate("active");
 });
 
 window.addEventListener("blur", function(e) {
 	hasFocus = false;
-	if(chatstate !== "inactive") {
-		conn.chatstate(muc, "inactive");
-		chatstate = "inactive";
-	}
+	setChatstate("inactive");
 });
 
 //
@@ -257,8 +306,7 @@ dom.chatsend_tb.addEventListener("keydown", function(e) {
 			}
 			else {
 				// -> active
-				chatstate = "active";
-				conn.mucmsg(muc, val);
+				sendMessage(val);
 				dom.chatsend_tb.value = "";
 			}
 		}
@@ -285,39 +333,57 @@ dom.chatsend_tb.addEventListener("keydown", function(e) {
 		setTimeout(function() {
 			var val = dom.chatsend_tb.value;
 			if(val === "") {
-				// -> active
-				if(chatstate !== "active") {
-					chatstate = "active";
-					conn.chatstate(muc, "active");
-				}
+				setChatstate("active");
 			}
 			else if(val[0] !== "/") {
-				// -> composing
-				if(chatstate !== "composing") {
-					chatstate = "composing";
-					conn.chatstate(muc, "composing");
-				}
+				setChatstate("composing");
 				chatstate_timeout = setTimeout(function() {
-					// -> paused
-					if(chatstate !== "paused") {
-						chatstate = "paused";
-						conn.chatstate(muc, "paused");
-					}
+					setChatstate("paused");
 				}, 4000);
 			}
 			else if(val[0] === "/") {
-				if(chatstate !== "active") {
-					chatstate = "active";
-					conn.chatstate(muc, "active");
-				}
+				setChatstate("active");
 			}
 		}, 0);
 	}
 });
 
-//
-// Unloading (TODO: make it work in chrome, which would mean using a synchronous request)
-//
-window.addEventListener("beforeunload", function(e) {
-	conn.end();
-});
+function setChatstate(state) {
+	if(chatstate !== state) {
+		chatstate = state;
+		conn.sendMessage({
+			to: muc,
+			type: "groupchat",
+			chatState: state
+		});
+	}
+}
+
+function sendMessage(body) {
+	conn.sendMessage({
+		to: muc,
+		type: "groupchat",
+		body: body
+	});
+}
+
+function setNick(nick) {
+	conn.joinRoom(muc, nick);
+}
+
+function setSubject(subject) {
+	conn.sendMessage({
+		to: muc,
+		type: "groupchat",
+		subject: subject
+	});
+}
+
+function system(body) {
+	var elm = dom.createMessage();
+	dom.updateMessage(elm, {
+		type: "system",
+		body: body
+	});
+	dom.appendMessage(elm);
+}

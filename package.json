@@ -10,6 +10,7 @@
 		"es6ify": "0.4.3"
 	},
 	"dependencies": {
-		"node-xmpp": "0.7.2"
+		"stanza.io": "2.7.1",
+		"jxt": "0.3.3"
 	}
 }

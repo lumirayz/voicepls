@@ -23,9 +23,10 @@ Configuration
 Create a file named config.js:
 
 	var config = {
-		bosh_service: <bosh service URL here>,
+		wsURL:        <websocket URL here>,
 		jid:          <service for anonymous JIDs here>,
-		muc_server:   <MUC component here>
+		muc_server:   <MUC component here>,
+		server:       <XMPP server here>
 	};
 	exports.config = config;
 
