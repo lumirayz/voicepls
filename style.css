@@ -27,6 +27,9 @@
 //  2013 lumirayz <lumirayz@gmail.com>
 */
 
+body {
+	overflow: hidden;
+}
 #main {
 	position: absolute;
 	left: 0px;
@@ -36,14 +39,15 @@
 }
 
 #topbar {
-	position: absolute;
-	left: 0;
-	top: 0;
 	width: 100%;
 	height: 23px;
-	border-bottom: 1px solid #111;
 	line-height: 23px;
 	text-align: center;
+	background: #444;
+	color: #fff;
+	border-radius: 2px;
+	width: calc(100% - 20px);
+	margin: 5px auto;
 }
 
 #splitter {
@@ -62,37 +66,46 @@
 }
 
 #userlist {
-	position: relative;
-	float: left;
-	width: 199px;
-	height: 100%;
-	border-left: 1px solid #111;
+	position: fixed;
+	width: 170px;
+	border: 1px solid #CCC;
+	margin-top: 15px;
+	right: 15px;
+	border-radius: 5px;
+	padding: 4px 0;
 }
 
 #chatrecv {
 	position: relative;
 	width: 100%;
-	height: calc(100% - 20px);
-	background-color: #FFF;
-	overflow: auto;
+	height: calc(100% - 50px);
+	background-color: rgb(255, 255, 255);
+	overflow-y: auto;
 	overflow-x: hidden;
+	top: 15px;
 }
 
 #chatsend {
 	position: relative;
-	width: 100%;
+	width: calc(100% - 10px);
 	height: 19px;
-	border-top: 1px solid #111;
+	border: 1px solid #AAA;
+	border-radius: 2px;
+	left: 5px;
+	background: #FFF;
+	bottom: -25px;
+	padding: 0 5px;
 }
 
 #chatsend_tb {
 	border: none;
+	background:transparent;
 	width: 100%;
 	height: 17px;
 }
 
 .msg_cont {
-	border-bottom: 1px solid #111;
+	margin: 4px;
 	overflow: hidden;
 }
 
@@ -116,9 +129,13 @@
 
 .msg_system_nick, .msg_emote_nick, .msg_text_nick {
 	float: left;
-	padding: 1px;
-	margin-right: 2px;
-	border-right: 1px solid #111;
+	padding-right: 5px;
+	margin-right: 5px;
+	border-right: 1px solid #AAA;
+	min-width: 100px;
+	text-align: right;
+	font-weight: bold;
+	font-size:10px;
 }
 
 .msg_emote_nick {
@@ -134,8 +151,17 @@
 	color: #F0F;
 }
 
+
 .ul_node_cont {
-	border-bottom: 1px solid #111;
+	padding: 4px;
+	display: block;
+	
+	margin: 1px 4px;
+	cursor: pointer;
+	border-radius: 5px;
+}
+.ul_node_cont:hover{
+	background: #EEE;
 }
 
 .ul_node_nick {
