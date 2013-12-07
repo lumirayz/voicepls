@@ -131,6 +131,72 @@ conn.on("groupchat", function(msg) {
 });
 
 //
+// Jingle and Muji
+//
+var
+	localStream  = undefined,
+	broadcasting = true,
+	mujiInfo     = {};
+
+conn.on("jingle:incoming", function(session) {
+	// Incoming call, accept it if we're broadcasting + it's in our muc.
+	if(conn.JID(session.peer).bare === muc && broadcasting) {
+		session.accept();
+	}
+});
+
+conn.on("jingle:outgoing", function(session) {
+	// Outgoing call, we actually don't need to do anything here.
+});
+
+conn.on("jingle:accepted", function(session) {
+	// Our call has been accepted, woo!
+});
+
+conn.on("jingle:terminated", function(session) {
+	// A Jingle session with someone has been terminated,
+	// try to re-establish it if possible (and the user hasn't
+	// purposely left the conference).
+	var nick = conn.JID(session.peer).resource;
+	if(mujiInfo.hasOwnProperty(nick)) {
+		// User is in conference, attempt to re-establish.
+		conn.call(muc + "/" + nick);
+	}
+});
+
+conn.on("jingle:localstream:added", function(stream) {
+	// Start broadcasting to everyone.
+	localStream = stream;
+});
+
+conn.on("jingle:localstream:removed", function() {
+	// Stop broadcasting to everyone.
+	localStream = undefined;
+});
+
+conn.on("jingle:remotestream:added", function(session) {
+	console.log("remote stream start", session);
+});
+
+conn.on("jingle:remotestream:removed", function(session) {
+	console.log("remote stream end", session);
+});
+
+function startJingle(nick) {
+	if(!localStream) {
+		conn.jingle.startLocalMedia({video: true, audio: true}, function(err, s) {
+			cont();
+		});
+	}
+	cont();
+	function cont() {
+		conn.discoverICEServers(function(err, ice) {
+			conn.call(muc + "/" + nick);
+		});
+	}
+}
+
+//
 // Join/leave
 //
 var participants = {};
@@ -149,20 +215,17 @@ conn.on("presence", function(pres) {
 				system(nick + " has left the room.");
 				delete participants[nick];
 				users.remove(nick);
+				delete mujiInfo[nick];
 			}
 		}
-		else { // Join.
-			if(participants.hasOwnProperty(nick)) {
-				// Probably a nick change.
-			}
-			else {
-				system(nick + " has joined the room.");
-				users.add(nick, {
-					chatstate: "active",
-					affiliation: mp.affiliation,
-					role: mp.role
-				});
-			}
+		else if(mp.codes.indexOf("303") === -1 && !participants.hasOwnProperty(nick)) { // Join
+			system(nick + " has joined the room.");
+			users.add(nick, {
+				chatstate: "active",
+				affiliation: mp.affiliation,
+				role: mp.role
+			});
+			participants[nick] = true;
 		}
 	}
 });
