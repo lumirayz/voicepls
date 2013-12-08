@@ -62,10 +62,10 @@ function handleURL(url) {
 // Images
 registerHandler(function(url) {
 	if(url.match(/\.(png|jpeg|jpg|gif)/g)) {
-		var img = document.createElement("img");
-		img.className = "msg_media_img";
-		img.src = url;
-		return img;
+		return {
+			type: "image",
+			url: url
+		};
 	}
 	else {
 		return null;

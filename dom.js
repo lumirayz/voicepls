@@ -107,6 +107,21 @@ function createMessage() {
 	return cont;
 }
 
+var messageMedia = {
+	image: obj => {
+		var img = document.createElement("img");
+		img.className = "msg_media_img";
+		img.src = obj.url;
+		img.addEventListener("click", e => {
+			var img = document.createElement("img");
+			img.className = "msg_media_overlay_img";
+			img.src = obj.url;
+			showOverlay(img);
+		});
+		return img;
+	}
+};
+
 function updateMessage(elm, msg) {
 	var a = elm.appInfo;
 	if(msg.type === "message") {
@@ -122,7 +137,7 @@ function updateMessage(elm, msg) {
 		a.body.className = "msg_emote_body";
 	}
 	else if(msg.type === "system") {
-		a.nick.textContent = "system";
+		a.nick.textContent = "!";
 		setBody(a.body, msg.body);
 		a.nick.className = "msg_system_nick";
 		a.body.className = "msg_system_body";
@@ -135,9 +150,11 @@ function updateMessage(elm, msg) {
 		}
 		a.media.style.display = "block";
 		medias.forEach(x => {
-			var div = document.createElement("div");
+			var
+				div = document.createElement("div"),
+				elm = messageMedia[x.type](x);
 			div.className = "msg_media_div";
-			div.appendChild(x);
+			div.appendChild(elm);
 			a.media.appendChild(div);
 		});
 	}
@@ -150,6 +167,36 @@ function updateMessage(elm, msg) {
 function appendMessage(elm) {
 	exports.chatrecv.appendChild(elm);
 	exports.chatrecv.scrollTop = exports.chatrecv.scrollHeight;
+}
+
+//
+// Overlay
+//
+var overlay = undefined, overlay_lis = undefined;
+
+function showOverlay(dom) {
+	if(overlay !== undefined) {
+		hideOverlay();
+	}
+	
+	overlay = dom;
+	overlay_lis = function(e) {
+		hideOverlay();
+		exports.main.removeEventListener(overlay_lis);
+	};
+	
+	exports.body.appendChild(overlay);
+	
+	exports.body.addEventListener("click", overlay_lis, true);
+}
+
+function hideOverlay() {
+	if(overlay !== undefined) {
+		exports.body.removeChild(overlay);
+		exports.main.removeEventListener(overlay_lis);
+		overlay = undefined;
+		overlay_lis = undefined;
+	}
 }
 
 //
@@ -199,6 +246,7 @@ function removeUserlistNode(elm) {
 // Exports
 //
 exports.body        = q("body");
+exports.main        = q("#main");
 exports.userlist    = q("#userlist");
 exports.chatrecv    = q("#chatrecv");
 exports.chatsend    = q("#chatsend");
@@ -219,3 +267,6 @@ exports.qa = qa;
 
 exports.setBody = setBody;
 exports.setTitle = setTitle;
+
+exports.showOverlay = showOverlay;
+exports.hideOverlay = hideOverlay;

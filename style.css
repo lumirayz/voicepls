@@ -118,17 +118,26 @@ body {
 }
 
 .msg_media_div {
+	position: relative;
 	display: block;
 	float: left;
 	width: 90px;
 	height: 90px;
 	margin: 5px;
 	overflow: hidden;
+	cursor: pointer;
 }
 
 .msg_media_img {
-	width: 100%;
-	height: 100%;
+	max-width: 100%;
+	max-height: 100%;
+}
+
+.msg_media_overlay_img {
+	position: absolute;
+	left: 0;
+	top: 0;
+	z-index: 100;
 }
 
 .msg_system_nick, .msg_text_nick, .msg_emote_nick {
@@ -139,7 +148,8 @@ body {
 	overflow: hidden;
 	text-align: right;
 	font-weight: bold;
-	font-size:10px;
+	font-size: 10px;
+	line-height: 15px;
 }
 
 .msg_system_nick {
