@@ -55,6 +55,9 @@ function handleURL(url) {
 			if(out !== null) {
 				return out;
 			}
+			else {
+				return null;
+			}
 		}
 	}, null);
 }
