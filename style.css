@@ -30,6 +30,7 @@
 body {
 	overflow: hidden;
 }
+
 #main {
 	position: absolute;
 	left: 0px;
@@ -111,7 +112,6 @@ body {
 
 .msg_media {
 	clear: both;
-	border-top: 1px solid #111;
 	height: 100px;
 	overflow: hidden;
 }
@@ -122,44 +122,56 @@ body {
 	width: 90px;
 	height: 90px;
 	margin: 5px;
-	border: 1px solid #111;
-	border-radius: 4px;
 	overflow: hidden;
 }
 
-.msg_system_nick, .msg_emote_nick, .msg_text_nick {
+.msg_media_img {
+	width: 100%;
+	height: 100%;
+}
+
+.msg_system_nick, .msg_text_nick, .msg_emote_nick {
 	float: left;
 	padding-right: 5px;
 	margin-right: 5px;
-	border-right: 1px solid #AAA;
-	min-width: 100px;
+	width: 100px;
+	overflow: hidden;
 	text-align: right;
 	font-weight: bold;
 	font-size:10px;
 }
 
+.msg_system_nick {
+	color: #F00;
+}
+
 .msg_emote_nick {
-	border-right: none;
-	color: #F0F;
+	visibility: hidden;
 }
 
 .msg_system_body, .msg_emote_body, .msg_text_body {
 	float: left;
+	overflow: hidden;
+	width: calc(100% - 120px);
+	border-left: 1px solid #111;
+	padding-left: 5px;
+	word-break: break-word;
 }
 
 .msg_emote_body {
 	color: #F0F;
+	border-left: none;
 }
-
 
 .ul_node_cont {
 	padding: 4px;
 	display: block;
-	
 	margin: 1px 4px;
 	cursor: pointer;
 	border-radius: 5px;
+	overflow: hidden;
 }
+
 .ul_node_cont:hover{
 	background: #EEE;
 }

@@ -30,7 +30,9 @@
 //
 // Requires
 //
-var media = require("./media");
+var
+	storage = require("./storage"),
+	media   = require("./media");
 
 //
 // Query
@@ -115,7 +117,7 @@ function updateMessage(elm, msg) {
 	}
 	else if(msg.type === "emote") {
 		a.nick.textContent = msg.nick;
-		setBody(a.body, msg.body);
+		setBody(a.body, "* " + msg.nick + " " + msg.body);
 		a.nick.className = "msg_emote_nick";
 		a.body.className = "msg_emote_body";
 	}
@@ -126,9 +128,11 @@ function updateMessage(elm, msg) {
 		a.body.className = "msg_system_body";
 	}
 	a.media.style.display = "none";
-	/* // TODO: security
 	medias = media.detectMessageMedia(msg.body);
-	if(medias.length > 0) {
+	if(storage.get("media.enabled") && medias.length > 0) {
+		while(medias.length > 3) { // Maximum 3 in one message.
+			medias.pop(-1);
+		}
 		a.media.style.display = "block";
 		medias.forEach(x => {
 			var div = document.createElement("div");
@@ -141,7 +145,6 @@ function updateMessage(elm, msg) {
 		a.media.style.display = "none";
 		a.media.innerHTML = "";
 	}
-	*/
 }
 
 function appendMessage(elm) {
@@ -214,4 +217,5 @@ exports.removeUserlistNode = removeUserlistNode;
 exports.q  = q;
 exports.qa = qa;
 
+exports.setBody = setBody;
 exports.setTitle = setTitle;
