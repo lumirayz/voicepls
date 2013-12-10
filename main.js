@@ -33,52 +33,10 @@
 var
 	config     = require("./config").config,
 	StanzaIO   = require("stanza.io"),
-	stanza     = require("jxt"),
 	dom        = require("./dom"),
 	Messages   = require("./messages").Messages,
 	Userlist   = require("./userlist").Userlist,
 	util       = require("./util");
-
-//
-// Add a few stanzas
-//
-
-// TODO: Maybe a good idea to upstream this?
-stanza.add(StanzaIO.Message, "subject", stanza.subText("jabber:client", "subject"));
-
-var MUC_NS = "http://jabber.org/protocol/muc";
-var MUC_USER_NS = MUC_NS + "#user";
-
-var MUCPresence = stanza.define({
-	name: "mucPresence",
-	element: "x",
-	namespace: MUC_USER_NS,
-	fields: {
-		affiliation: stanza.subAttribute(MUC_USER_NS, "item", "affiliation"),
-		nick: stanza.subAttribute(MUC_USER_NS, "item", "nick"),
-		jid: stanza.subAttribute(MUC_USER_NS, "item", "jid"),
-		role: stanza.subAttribute(MUC_USER_NS, "item", "role"),
-		codes: {
-			get: function() {
-				return stanza.find(this.xml, MUC_USER_NS, "status")
-					.map(function(x) {return x.getAttribute("code");});
-			},
-			set: function(val) {
-				var codes = stanza.find(this.xml, MUC_USER_NS, "status");
-				for(var i = 0; i < codes.length; i++) {
-					this.xml.removeChild(codes[i]);
-				}
-				for(var i = 0; i < val.length; i++) {
-					var elm = document.createElementNS(MUC_USER_NS, "status");
-					elm.setAttribute(val[i]);
-					this.xml.appendChild(elm);
-				}
-			}
-		}
-	}
-});
-
-stanza.extend(StanzaIO.Presence, MUCPresence);
 
 //
 // Init
