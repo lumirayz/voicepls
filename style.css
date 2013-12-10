@@ -86,16 +86,33 @@ body {
 	top: 15px;
 }
 
-#chatsend {
+#chatbuttons {
 	position: relative;
-	width: calc(100% - 10px);
-	height: 19px;
+	height: 20px;
+	width: 100%;
+	margin-left: 5px;
+	background-color: #CCC;
+	border: 1px solid #111;
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+#chatbuttons > .chatbutton {
+	width: 18px;
+	height: 18px;
+	margin: 1px;
+	cursor: pointer;
+}
+
+#chatsend {
+	width: 100%;
+	height: 20px;
 	border: 1px solid #AAA;
 	border-radius: 2px;
-	left: 5px;
+	margin-left: 5px;
 	background: #FFF;
-	bottom: -25px;
-	padding: 0 5px;
+	margin-bottom: 5px;
+	margin-top: 5px;
 }
 
 #chatsend_tb {

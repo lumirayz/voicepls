@@ -243,6 +243,31 @@ function removeUserlistNode(elm) {
 }
 
 //
+// Buttons
+//
+function makeChatButton(opts) {
+	var img = document.createElement("img");
+	img.className = "chatbutton";
+	img.src = "icons/" + opts.icon + ".png";
+	img.title = opts.name;
+	return img;
+}
+
+function addButton(opts, onclick) {
+	var dom = makeChatButton(opts);
+	dom.appInfo = {opts: opts, onclick: onclick};
+	exports.chatbuttons.appendChild(dom);
+	dom.addEventListener("click", onclick);
+	return dom;
+}
+
+function removeButton(dom) {
+	dom.removeEventListener(dom.appInfo.onclick);
+	delete dom.appInfo.onclick;
+	exports.chatbuttons.removeChild(dom);
+}
+
+//
 // Exports
 //
 exports.body        = q("body");
@@ -250,6 +275,7 @@ exports.main        = q("#main");
 exports.userlist    = q("#userlist");
 exports.chatrecv    = q("#chatrecv");
 exports.chatsend    = q("#chatsend");
+exports.chatbuttons = q("#chatbuttons");
 exports.chatsend_tb = q("#chatsend_tb");
 exports.topbar      = q("#topbar");
 
@@ -267,6 +293,9 @@ exports.qa = qa;
 
 exports.setBody = setBody;
 exports.setTitle = setTitle;
+
+exports.addButton = addButton;
+exports.removeButton = removeButton;
 
 exports.showOverlay = showOverlay;
 exports.hideOverlay = hideOverlay;

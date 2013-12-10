@@ -1,3 +1,5 @@
+"use strict";
+
 /*
 	This file is part of Voicepls.
 
@@ -53,13 +55,15 @@ var muc = window.location.href.split("?").slice(1).join("?") + "@" + config.muc_
 
 var hasFocus = true, unreadMessages = 0;
 
+var mynick ="omnomnom" + Math.floor(Math.random() * 1000000);
+
 conn.connect();
 
 //
 // Online
 //
 conn.on("session:started", function() {
-	conn.joinRoom(muc, "omnomnom" + Math.floor(Math.random() * 1000000));
+	conn.joinRoom(muc, mynick);
 });
 
 //
@@ -93,7 +97,7 @@ conn.on("groupchat", function(msg) {
 //
 var
 	localStream  = undefined,
-	broadcasting = true,
+	broadcasting = false,
 	mujiInfo     = {};
 
 conn.on("jingle:incoming", function(session) {
@@ -141,17 +145,68 @@ conn.on("jingle:remotestream:removed", function(session) {
 });
 
 function startJingle(nick) {
+	console.log("Starting Jingle to " + nick);
+	conn.discoverICEServers(function(err, ice) {
+		conn.call(muc + "/" + nick);
+	});
+}
+
+conn.on("presence", function(pres) {
+	if(pres.from.bare === muc && pres.from.nick !== mynick) {
+		var mp = pres.mujiPresence;
+		if(mp.contents.length > 0) {
+			// Someone joined.
+			startJingle(pres.from.resource);
+		}
+		else {
+			// Someone left.
+		}
+	}
+});
+
+function joinMuji() {
+	if(broadcasting) return;
+	
 	if(!localStream) {
 		conn.jingle.startLocalMedia({video: true, audio: true}, function(err, s) {
 			cont();
 		});
 	}
-	cont();
-	function cont() {
-		conn.discoverICEServers(function(err, ice) {
-			conn.call(muc + "/" + nick);
-		});
+	else {
+		cont();
 	}
+	
+	function cont() {
+		conn.sendPresence({
+			to: muc,
+			mujiPresence: {
+				preparing: true
+			}
+		});
+		
+		conn.sendPresence({
+			to: muc,
+			mujiPresence: {
+				preparing: false,
+				contents: [{
+					name: "voice",
+					creator: "initiator",
+					description: {
+						descType: "rtp",
+						media: "audio"
+					}
+				}]
+			}
+		});
+		
+		broadcasting = true;
+	}
+}
+
+function leaveMuji() {
+	if(!broadcasting) return;
+	conn.sendPresence({to: muc});
+	broadcasting = false;
 }
 
 //
@@ -304,6 +359,18 @@ window.addEventListener("blur", function(e) {
 });
 
 //
+// Buttons
+//
+dom.addButton({name: "Toggle Muji", icon: "none"}, function() {
+	if(broadcasting) {
+		leaveMuji();
+	}
+	else {
+		joinMuji();
+	}
+});
+
+//
 // Send message
 //
 var
@@ -390,6 +457,7 @@ function sendMessage(body) {
 
 function setNick(nick) {
 	conn.joinRoom(muc, nick);
+	mynick = nick;
 }
 
 function setSubject(subject) {
